@@ -1,0 +1,31 @@
+projection;
+strict ( 2 );
+use draft;
+define behavior for ZBSH_VN_TRAVEL_PROCESSOR alias Travel
+implementation in class zcl_bsh_vn_trav_proc unique
+{
+  use create ( augment, precheck );
+  use update ( precheck );
+  use delete;
+  use action copyTravel;
+  use action Activate;
+  use action Edit;
+  use action Resume;
+  use action Discard;
+  use action Prepare;
+  use association _Booking { create; with draft; }
+}
+define behavior for ZBSH_VN_BOOKING_PROCESSOR alias Booking
+{
+  use update;
+  use delete;
+  use association _Travel;
+  use association _BookingSupplement { create; with draft; }
+}
+define behavior for ZBSH_VN_BOOKSUPPL_PROCESSOR alias BookSuppl
+{
+  use update;
+  use delete;
+  use association _Travel;
+  use association _Booking;
+}

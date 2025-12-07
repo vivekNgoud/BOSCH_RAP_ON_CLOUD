@@ -1,0 +1,7 @@
+CLASS zbp_bsh_vn_travel DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zbsh_vn_travel.
+ENDCLASS.
+
+
+
+CLASS zbp_bsh_vn_travel IMPLEMENTATION.
+ENDCLASS.

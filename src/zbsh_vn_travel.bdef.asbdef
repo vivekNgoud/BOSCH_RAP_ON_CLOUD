@@ -1,0 +1,139 @@
+//this will tell RAP framework that we depend on you so you can create
+//CRUD code automatically
+managed
+//if we want to add extra code like authorization, validation, prechecks
+//determinations, actions, augment....
+implementation in class zbp_bsh_vn_travel unique;
+//tell the RAP engine to compile code in strict mode
+strict ( 2 );
+//add draft feature at BO level
+with draft;
+define behavior for ZBSH_VN_TRAVEL alias Travel
+implementation in class zbp_bsh_vn_travel unique
+//table in which RAP will insert the data for me
+persistent table /dmo/travel_m
+//will tell RAP, how to manage locks, in bg it create ENQUE and DEQUE
+lock master
+//mandatory to use total etag
+total etag LastChangedAt
+//Who can insert,update, delete data like app security
+authorization master ( instance )
+//the table which will get created automatically
+draft table zbsh_vn_dtrav
+//Concurrency Handling
+etag master LastChangedAt
+//support for early numbering to generate travel id automatically
+early numbering
+{
+  //precheck - check before data reach transaction buffer -> draft
+  create ( precheck );
+  update ( precheck );
+  delete;
+  //by using behavior definition what feature to read only, mandatory
+  field ( readonly ) TravelId, TotalPrice, CreatedAt, CreatedBy, LastChangedAt, LastChangedBy;
+  field ( mandatory ) BeginDate, EndDate, AgencyId, CustomerId;
+  //You can say to RAP to trigger validation only when certain fields changes
+  //Checking custom business object rules
+  validation validateHeaderData on save { create; field CustomerId, BeginDate, EndDate; }
+  //its a piece of code which we can consume wherever we want in future
+  internal action reCalcTotalPrice;
+  //define a determination which will get called whenever user touch in create/update mode
+  //the booking fee field
+  determination calculateTotalPrice on modify
+  { create; field BookingFee, CurrencyCode; }
+  //Adding side-effect which inform RAP to reaload the total price if the booking
+  //fee has been changed on the Frontend
+  side effects
+  {
+    field BookingFee affects field TotalPrice;
+  }
+  //adding the draft actions
+  draft determine action Prepare;
+  draft action Edit;
+  draft action Resume;
+  draft action Activate;
+  draft action Discard;
+  association _Booking { create ( features : instance ); }
+  //instance bound factory data action - user pick an instance and makes a copy
+  factory action copyTravel [1];
+  mapping for /dmo/travel_m
+    {
+      TravelId      = travel_id;
+      agencyId      = agency_id;
+      CustomerId    = customer_id;
+      BeginDate     = begin_date;
+      EndDate       = end_date;
+      TotalPrice    = total_price;
+      BookingFee    = booking_fee;
+      CurrencyCode  = currency_code;
+      LastChangedAt = last_changed_at;
+      LastChangedBy = last_changed_by;
+      CreatedAt     = created_at;
+      CreatedBy     = created_by;
+      OverallStatus = overall_status;
+      Description   = description;
+    }
+}
+define behavior for ZBSH_VN_BOOKING alias Booking
+implementation in class zbp_bsh_vn_booking unique
+persistent table /dmo/booking_m
+//add table for booking for storing draft
+draft table zbsh_vn_dbook
+lock dependent by _Travel
+authorization dependent by _Travel
+etag master LastChangedAt
+//add support for early numbering for booking
+early numbering
+{
+  update;
+  delete;
+  field ( readonly ) TravelId, BookingId;
+  field ( mandatory ) CarrierId, ConnectionId, FlightDate, CustomerId;
+  association _Travel;
+  association _BookingSupplement { create; }
+  determination calculateTotalPrice on modify
+  { create; field FlightPrice, CurrencyCode; }
+  //Side effect
+  side effects
+  {
+    field FlightPrice affects field _Travel.TotalPrice;
+  }
+  mapping for /dmo/booking_m
+    {
+      BookingId     = booking_id;
+      TravelId      = travel_id;
+      BookingDate   = booking_date;
+      BookingStatus = booking_status;
+      CarrierId     = carrier_id;
+      ConnectionId  = connection_id;
+      FlightDate    = flight_date;
+      FlightPrice   = flight_price;
+      CurrencyCode  = currency_code;
+      CustomerId    = customer_id;
+    }
+}
+define behavior for ZBSH_VN_BOOKSUPPL alias BookSuppl
+persistent table /dmo/booksuppl_m
+//add draft for booking supplement
+draft table zbsh_vn_dbksup
+lock dependent by _Travel
+authorization dependent by _Travel
+etag master LastChangedAt
+early numbering
+{
+  update;
+  delete;
+  field ( readonly ) TravelId, BookingId, BookingSupplementId;
+  association _Travel;
+  association _Booking;
+  mapping for /dmo/booksuppl_m
+    {
+      TravelId            = travel_id;
+      BookingId           = booking_id;
+      BookingSupplementId = booking_supplement_id;
+      SupplementId        = supplement_id;
+      CurrencyCode        = currency_code;
+      Price               = price;
+      LastChangedAt       = last_changed_at;
+    }
+}

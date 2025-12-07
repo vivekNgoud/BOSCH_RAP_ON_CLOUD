@@ -1,0 +1,113 @@
+@Metadata.layer:#CUSTOMER
+@UI.headerInfo: {
+   typeName: 'Travel',
+   typeNamePlural: 'Travels',
+   title:{ value: 'TravelId' },
+   description:{ value: 'Description' }
+}
+@Search.searchable: true
+annotate entity ZBSH_VN_TRAVEL_PROCESSOR with
+{
+  @UI.facet: [
+        {
+            purpose: #HEADER,
+            id: 'TravelHeaderPrice',
+            type: #DATAPOINT_REFERENCE,
+            position: 10,
+            targetQualifier: 'spiderman'
+        },
+        {
+            purpose: #HEADER,
+            id: 'TravelStatus',
+            type: #DATAPOINT_REFERENCE,
+            position: 20,
+            targetQualifier: 'superman'
+        },
+        {
+            purpose: #STANDARD,
+            id: 'mycollection',
+            type: #COLLECTION,
+            position: 10,
+            label: 'General Information'
+        },
+        {
+            purpose: #STANDARD,
+            id: 'identification',
+            parentId: 'mycollection',
+            type: #IDENTIFICATION_REFERENCE,
+            position: 10,
+            label: 'More Info'
+        },
+        {
+            purpose: #STANDARD,
+            id: 'dates',
+            parentId: 'mycollection',
+            type: #FIELDGROUP_REFERENCE,
+            position: 20,
+            label: 'Travel Dates',
+            targetQualifier: 'dates'
+        },
+        {
+            purpose: #STANDARD,
+            id: 'prices',
+            parentId: 'mycollection',
+            type: #FIELDGROUP_REFERENCE,
+            position: 30,
+            label: 'Cost Info',
+            targetQualifier: 'prices'
+        },
+        {
+        purpose: #STANDARD,
+        type:#LINEITEM_REFERENCE,
+        position: 20,
+        targetElement: '_Booking'
+        }
+    ]
+  @UI.selectionField: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10, type: #FOR_ACTION, dataAction: 'copyTravel', label: 'Copy Travel' }]
+  @Search.defaultSearchElement: true
+  @Search.fuzzinessThreshold: 0.6
+  @UI.identification: [{ position: 10 }]
+  TravelId;
+  @UI.selectionField: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20 }]
+  @Search.defaultSearchElement: true
+  @UI.identification: [{ position: 30 }]
+  AgencyId;
+  @UI.selectionField: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 40 }]
+  CustomerId;
+  @UI.lineItem: [{ position: 40 }]
+  @UI.fieldGroup: [{ position: 10, qualifier: 'dates' }]
+  BeginDate;
+  @UI.fieldGroup: [{ position: 20, qualifier: 'dates' }]
+  EndDate;
+  @UI.fieldGroup: [{ position: 10, qualifier: 'prices' }]
+  BookingFee;
+  @UI.selectionField: [{ position: 40 }]
+  @UI.lineItem: [{ position: 50 }]
+  @UI.dataPoint: { qualifier: 'spiderman', title: 'Total Price' }
+  @UI.fieldGroup: [{ position: 20, qualifier: 'prices' }]
+  TotalPrice;
+  @UI.fieldGroup: [{ position: 30, qualifier: 'prices' }]
+  CurrencyCode;
+  @UI.identification: [{ position: 20 }]
+  Description;
+  @UI.selectionField: [{ position: 50 }]
+  @UI.lineItem: [{ position: 60, criticality: 'IconColor', importance: #HIGH }]
+  @UI.dataPoint: { qualifier: 'superman', title: 'Status', criticality: 'IconColor' }
+  @UI.fieldGroup: [{ position: 30, qualifier: 'dates' }]
+  OverallStatus;
+  @UI.selectionField: [{ position: 60 }]
+  CreatedBy;
+  @UI.lineItem: [{ position: 70, importance: #HIGH }]
+  dayOfTheFlight;
+  @UI.lineItem: [{ position: 80, importance: #HIGH }]
+  CO2Tax;
+
+  //    CreatedAt;
+  //    LastChangedBy;
+  //    LastChangedAt;
+
+}
